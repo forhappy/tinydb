@@ -57,4 +57,4 @@ DELETE
 Bugs
 =====
 Tinydb is tiny project worked in my free time but bugs are inevitable, if you have found some bugs please contact haipingf AT gmail DOT com.
-I'm happy to hear you voice. :-)
+I'm happy to hear your voice. :-)
