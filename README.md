@@ -30,7 +30,7 @@ it's awsome right?, just to keep it simple and beautiful.
 
 How to make it run ?
 ====================
-After you compiled tinydb there is an executable file name "server", just run it in command line with no arguments:
+After you compiled tinydb there is an executable file named "server", just run it in command line with no arguments:
 > $: ./server
 
 Open your browser and type something in the URL box, magic will happen here.
