@@ -71,6 +71,10 @@ struct engine_leveldb_s_ {
 	engine_leveldb_config_t *config;
 };
 
-extern engine_leveldb_t * engine_leveldb_init();
+extern engine_leveldb_config_t *
+engine_leveldb_config_init(const char *dbname);
+
+extern engine_leveldb_t *
+engine_leveldb_init(engine_leveldb_config_t *config);
 
 #endif /* LEVELDB_ENGINE_H */

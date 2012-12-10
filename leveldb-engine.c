@@ -19,8 +19,6 @@
 
 #include "leveldb-engine.h"
 
-static char *dbname = "/tmp/leveldb";
-
 static int
 put(engine_base_t *engine,
 		const char *key, unsigned int key_len,
@@ -56,8 +54,8 @@ delete(engine_base_t *engine,
 	return 0;
 }
 
-static  engine_leveldb_config_t *
-engine_leveldb_config_init(void)
+engine_leveldb_config_t *
+engine_leveldb_config_init(const char* dbname)
 {
 	engine_leveldb_config_t *config = (engine_leveldb_config_t *)
 		malloc(sizeof(engine_leveldb_config_t));
@@ -124,12 +122,12 @@ leveldb_instance_init(engine_leveldb_config_t *config)
 
 }
 
-engine_leveldb_t * engine_leveldb_init()
+engine_leveldb_t *
+engine_leveldb_init(engine_leveldb_config_t *config)
 {
 	engine_leveldb_t *engine = (engine_leveldb_t *)
 		malloc(sizeof(engine_leveldb_t));
 
-	engine_leveldb_config_t *config = engine_leveldb_config_init();
 	leveldb_instance_t * instance = leveldb_instance_init(config);
 
 	engine->config = config;

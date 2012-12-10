@@ -51,6 +51,8 @@ csas_context_t * csas_init(engine_base_t *engine);
 
 void csas_destory(csas_context_t *context);
 
+void csas_set_engine(csas_context_t *context, engine_base_t *engine);
+
 int csas_put(csas_context_t *context,
 		const char *key, unsigned int key_len,
 		const char *value, unsigned int value_len);

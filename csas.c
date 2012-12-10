@@ -26,6 +26,15 @@ csas_context_t * csas_init(engine_base_t *engine)
 	return context;
 }
 
+void csas_set_engine(csas_context_t *context, engine_base_t *engine)
+{
+	assert(context != NULL);
+	assert(engine != NULL);
+	if (context->engine != NULL) {
+		context->engine = engine;
+	}
+}
+
 void csas_destory(csas_context_t *context)
 {
 	assert(context != NULL);
