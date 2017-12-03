@@ -19,85 +19,90 @@
 #include <string.h>
 #include <assert.h>
 #include <errno.h>
-
-#include "evhtp/evhtp.h"
+#include <evhtp/evhtp.h>
 
 #define TINYDB_USE_ENGINE_LEVELDB
 
 #if defined(TINYDB_USE_ENGINE_LEVELDB)
-#include "leveldb-engine.h"
+#include "NoSQL-engine/leveldb-engine.h"
 #else
-#include "inmemory-engine.h"
+#include "HashMap-engine/inmemory-engine.h"
 #endif
 
 
-#define TINYDB_MAX_KV_RESPONSE_BUFFER_SIZE      (1024 * 1024 *2)  # 2MB
-#define TINYDB_MAX_ERROR_RESPONSE_BUFFER_SIZE   1024              # 1KB
+#define TINYDB_MAX_KV_RESPONSE_BUFFER_SIZE      (1024 * 1024 *2)  // 2MB
+#define TINYDB_MAX_ERROR_RESPONSE_BUFFER_SIZE   1024              // 1KB
 
 static char *
-tinydb_jsonfy_kv_response(const char *key, const char *val)
+tinydb_jsonfy_kv_response(const char *key,
+                          const char *val)
 {
 	assert(key != NULL);
 	assert(val != NULL);
 
-	char *response = (char *)malloc(sizeof(char) *
-			TINYDB_MAX_KV_RESPONSE_BUFFER_SIZE);
+	char *response = (char *)malloc(sizeof(char) * TINYDB_MAX_KV_RESPONSE_BUFFER_SIZE);
 	if (response == NULL) {
 		fprintf(stderr, "malloc error due to out of memory.\n");
 		return NULL;
 	} else {
 		sprintf(response, "{\"key\": \"%s\",\"val\":\"%s\"}", key, val);
 	}
+
 	return response;
 }
 
 static char *
-tinydb_jsonfy_error_response(const char *err, const char *msg)
+tinydb_jsonfy_error_response(const char *err,
+                             const char *msg)
 {
 	assert(err != NULL);
 	assert(msg != NULL);
 
-	char *response = (char *)malloc(sizeof(char) *
-			TINYDB_MAX_ERROR_RESPONSE_BUFFER_SIZE);
+	char *response = (char *)malloc(sizeof(char) * TINYDB_MAX_ERROR_RESPONSE_BUFFER_SIZE);
 	if (response == NULL) {
 		fprintf(stderr, "malloc error due to out of memory.\n");
 		return NULL;
 	} else {
 		sprintf(response, "{\"err\": \"%s\",\"msg\":\"%s\"}", err, msg);
 	}
+
 	return response;
 }
 
 static void
-URI_get_cb(evhtp_request_t *req, void *userdata)
+URI_get_cb(evhtp_request_t *req,
+           void *userdata)
 {
 	assert(userdata != NULL);
+
 	csas_context_t *context = (csas_context_t *)userdata;
 	/* json formatted response. */
 	char *response = NULL;
 	char *value = NULL;
-	unsigned int value_len = -1;
+	size_t value_len = -1;
 
 	/* HTTP protocol used */
 	evhtp_proto proto = req->proto;
 	if (proto != EVHTP_PROTO_11) {
 		response = tinydb_jsonfy_error_response("ProtocalError",
-				"Protocal error, you may have to use HTTP/1.1 to do request.");
+		                                        "Protocal error, you may have to use HTTP/1.1 to do request.");
 		evbuffer_add_printf(req->buffer_out, "%s", response);
 		evhtp_send_reply(req, EVHTP_RES_OK);
 		free(response);
 		return;
 	}
+
 	/* request method. */
 	int method= evhtp_request_get_method(req);
 	if (method != htp_method_GET) {
 		response = tinydb_jsonfy_error_response("HTTPMethodError",
-				"HTTP method error, you may have to use GET to do request.");
+				                                "HTTP method error, you may have to use GET to do request.");
 		evbuffer_add_printf(req->buffer_out, "%s", response);
 		free(response);
 		evhtp_send_reply(req, EVHTP_RES_OK);
 		return;
 	}
+
 	/* request query from client */
 	evhtp_query_t *query = req->uri->query;
 	const char *key = evhtp_kv_find(query, "key");
@@ -105,7 +110,7 @@ URI_get_cb(evhtp_request_t *req, void *userdata)
 	if (value != NULL) {
 		char *buf = (char *)malloc(sizeof(char) * (value_len + 1));
 		memset(buf, 0, value_len + 1);
-		snprintf(buf, value_len + 1, "%s", value);TINYDB_USE_ENGINE_LEVELDB
+		snprintf(buf, value_len + 1, "%s", value);
 		response = tinydb_jsonfy_kv_response(key, buf);
 		evbuffer_add_printf(req->buffer_out, "%s", response);
 		evhtp_send_reply(req, EVHTP_RES_OK);
@@ -114,7 +119,8 @@ URI_get_cb(evhtp_request_t *req, void *userdata)
 		free(value);
 		free(response);
 	} else {
-		response = tinydb_jsonfy_error_response("NoSuchKey", "No such key exists, please check agein.");
+		response = tinydb_jsonfy_error_response("NoSuchKey",
+		                                        "No such key exists, please check agein.");
 		evbuffer_add_printf(req->buffer_out, "%s", response);
 		free(response);
 		evhtp_send_reply(req, EVHTP_RES_OK);
@@ -124,9 +130,11 @@ URI_get_cb(evhtp_request_t *req, void *userdata)
 }
 
 static void
-URI_set_cb(evhtp_request_t *req, void *userdata)TINYDB_USE_ENGINE_LEVELDB
+URI_set_cb(evhtp_request_t *req,
+           void *userdata)
 {
 	assert(userdata != NULL);
+
 	csas_context_t *context = (csas_context_t *)userdata;
 	/* json formatted response. */
 	char *response = NULL;
@@ -136,37 +144,42 @@ URI_set_cb(evhtp_request_t *req, void *userdata)TINYDB_USE_ENGINE_LEVELDB
 	evhtp_proto proto = req->proto;
 	if (proto != EVHTP_PROTO_11) {
 		response = tinydb_jsonfy_error_response("ProtocalError",
-				"Protocal error, you may have to use HTTP/1.1 to do request.");
+				                                "Protocal error, you may have to use HTTP/1.1 to do request.");
 		evbuffer_add_printf(req->buffer_out, "%s", response);
 		evhtp_send_reply(req, EVHTP_RES_OK);
 		free(response);
 		return;
 	}
+
 	/* request method. */
 	int method= evhtp_request_get_method(req);
 	if (method != htp_method_GET) {
 		response = tinydb_jsonfy_error_response("HTTPMethodError",
-				"HTTP method error, you may have to use GET to do request.");
+				                                "HTTP method error, you may have to use GET to do request.");
 		evbuffer_add_printf(req->buffer_out, "%s", response);
 		free(response);
 		evhtp_send_reply(req, EVHTP_RES_OK);
 		return;
 	}
+
 	/* request query from client */
 	evhtp_query_t *query = req->uri->query;
 	const char *key = evhtp_kv_find(query, "key");
 	const char *value = evhtp_kv_find(query, "value");
 	ret = csas_put(context, key, strlen(key), value, strlen(value));
 	if (ret < 0) {
-		response = tinydb_jsonfy_error_response("SetKVError", "Set Key-Value pair error.");
+		response = tinydb_jsonfy_error_response("SetKVError",
+		                                        "Set Key-Value pair error.");
 	} else {
-		response = tinydb_jsonfy_error_response("OK", "Set key successfully.");
+		response = tinydb_jsonfy_error_response("OK",
+		                                        "Set key successfully.");
 	}
 
     evbuffer_add_printf(req->buffer_out, "%s", response);
     evhtp_send_reply(req, EVHTP_RES_OK);
 
 	free(response);
+
 	return;
 }
 
@@ -174,6 +187,7 @@ static void
 URI_delete_cb(evhtp_request_t *req, void *userdata)
 {
 	assert(userdata != NULL);
+
 	csas_context_t *context = (csas_context_t *)userdata;
 	/* json formatted response. */
 	char *response = NULL;
@@ -184,35 +198,40 @@ URI_delete_cb(evhtp_request_t *req, void *userdata)
 	evhtp_proto proto = req->proto;
 	if (proto != EVHTP_PROTO_11) {
 		response = tinydb_jsonfy_error_response("ProtocalError",
-				"Protocal error, you may have to use HTTP/1.1 to do request.");
+				                                "Protocal error, you may have to use HTTP/1.1 to do request.");
 		evbuffer_add_printf(req->buffer_out, "%s", response);
 		evhtp_send_reply(req, EVHTP_RES_OK);
 		free(response);
 		return;
 	}
+
 	/* request method. */
 	int method= evhtp_request_get_method(req);
 	if (method != htp_method_GET) {
 		response = tinydb_jsonfy_error_response("HTTPMethodError",
-				"HTTP method error, you may have to use GET to do request.");
+				                                "HTTP method error, you may have to use GET to do request.");
 		evbuffer_add_printf(req->buffer_out, "%s", response);
 		free(response);
 		evhtp_send_reply(req, EVHTP_RES_OK);
 		return;
 	}
+
 	/* request query from client */
 	evhtp_query_t *query = req->uri->query;
 	const char *key = evhtp_kv_find(query, "key");
 	ret = csas_delete(context, key, strlen(key));
 	if (ret < 0) {
-		response = tinydb_jsonfy_error_response("DeleteKVError", "Delete Key-Value pair error.");
+		response = tinydb_jsonfy_error_response("DeleteKVError",
+		                                        "Delete Key-Value pair error.");
 	} else {
-		response = tinydb_jsonfy_error_response("OK", "Delete key successfully.");
+		response = tinydb_jsonfy_error_response("OK",
+		                                        "Delete key successfully.");
 	}
     evbuffer_add_printf(req->buffer_out, "%s", response);
     evhtp_send_reply(req, EVHTP_RES_OK);
 
 	free(response);
+	
 	return;
 }
 

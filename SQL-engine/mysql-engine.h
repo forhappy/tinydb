@@ -1,9 +1,9 @@
 /*
  * =============================================================================
  *
- *       Filename:  example-engine.h
+ *       Filename:  mysql-engine.h
  *
- *    Description:  example storage engine
+ *    Description:  mysql storage engine
  *
  *        Created:  11/24/2012 03:49:23 PM
  *
@@ -13,15 +13,15 @@
  * =============================================================================
  */
 
-#ifndef __EXAMPLE_ENGINE_H__
-#define __EXAMPLE_ENGINE_H__
+#ifndef __MYSQL_ENGINE_H__
+#define __MYSQL_ENGINE_H__
 
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
-#include "csas.h"
+#include "../csas.h"
 
-extern engine_base_t * engine_example_init();
+extern engine_base_t * engine_mysql_init();
 
-#endif /* __EXAMPLE_ENGINE_H__ */
+#endif /* __MYSQL_ENGINE_H__ */

@@ -1,19 +1,11 @@
-all:server t 
+all:server
 
 CC=gcc
-CFLAGS=-g -std=c99 -Wall -Wno-unused -I/usr/local/include/leveldb/ -I./include/ 
-LDFALGS=-lpthread\
-		-L/usr/local/lib/ -lleveldb -levent\
-		-L./lib/ -levhtp
+CFLAGS=-g -std=c99 -Wall -Wno-unused -I/usr/local/include/leveldb/ -I/usr/local/include/evhtp/
+LDFALGS=-L/usr/lib -lpthread -L/usr/local/lib -lleveldb -levent -levhtp
 
-server:server.o csas.o\
-	inmemory-engine.o\
-	leveldb-engine.o\
-	sqlite-engine.o\
-	example-engine.o
-	$(CC) -o $@ $^ $(LDFALGS)
-
-t:t.o csas.o\
+server:server.o\
+    csas.o\
 	inmemory-engine.o\
 	leveldb-engine.o\
 	sqlite-engine.o\
@@ -21,9 +13,6 @@ t:t.o csas.o\
 	$(CC) -o $@ $^ $(LDFALGS)
 
 server.o:server.c
-	$(CC) -o $@ -c $^ $(CFLAGS)
-
-t.o:t.c
 	$(CC) -o $@ -c $^ $(CFLAGS)
 
 csas.o:csas.c
@@ -45,7 +34,8 @@ example-engine.o:example-engine.c
 .PHONY:clean
 
 clean:
-	rm server t server.o t.o csas.o\
+	rm server server.o\
+        csas.o\
 		inmemory-engine.o\
 		leveldb-engine.o\
 		sqlite-engine.o\

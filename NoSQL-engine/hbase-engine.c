@@ -1,9 +1,9 @@
 /*
  * =============================================================================
  *
- *       Filename:  example-engine.c
+ *       Filename:  hbase-engine.c
  *
- *    Description:  example storage engine.
+ *    Description:  hbase storage engine.
  *
  *        Created:  11/24/2012 03:49:34 PM
  *
@@ -13,7 +13,7 @@
  * =============================================================================
  */
 
-#include "example-engine.h"
+#include "hbase-engine.h"
 
 static int
 put(engine_base_t *engine,
@@ -22,7 +22,7 @@ put(engine_base_t *engine,
 	const char *value,
 	size_t value_len)
 {
-	printf("hook call to example engine put.\n");
+	printf("hook call to hbase engine put.\n");
 
 	return 0;
 }
@@ -33,7 +33,7 @@ get(engine_base_t *engine,
 	size_t key_len,
 	size_t *value_len)
 {
-	printf("hook call to example engine get.\n");
+	printf("hook call to hbase engine get.\n");
 
 	return NULL;
 }
@@ -43,18 +43,18 @@ delete(engine_base_t *engine,
 	   const char *key,
 	   size_t key_len)
 {
-	printf("hook call to example engine delete.\n");
+	printf("hook call to hbase engine delete.\n");
 
 	return 0;
 }
 
 engine_base_t *
-engine_example_init(void)
+engine_hbase_init(void)
 {
 	engine_base_t *engine = (engine_base_t *) malloc(sizeof(engine_base_t));
 	engine_operation_t *engine_ops = (engine_operation_t *)malloc(sizeof(engine_operation_t));
 
-	const char *engine_name = "example engine v0.1";
+	const char *engine_name = "hbase engine v0.1";
 	size_t engine_name_len = strlen(engine_name);
 	engine->name = malloc(sizeof(char) * (engine_name_len + 1));
 	memset(engine->name, 0, (engine_name_len + 1));
