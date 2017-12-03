@@ -1,9 +1,9 @@
 /*
  * =============================================================================
  *
- *       Filename:  net.c
+ *       Filename:  server.c
  *
- *    Description:  network connection utility.
+ *    Description:  a tiny nosql database supporting pluggable storage engine.
  *
  *        Created:  12/06/2012 08:24:19 PM
  *
@@ -13,11 +13,11 @@
  * =============================================================================
  */
 
-#include <assert.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <string.h>
 #include <stdint.h>
+#include <string.h>
+#include <assert.h>
 #include <errno.h>
 
 #include "evhtp/evhtp.h"
@@ -31,8 +31,8 @@
 #endif
 
 
-#define TINYDB_MAX_KV_RESPONSE_BUFFER_SIZE (1024 * 1024 *2)
-#define TINYDB_MAX_ERROR_RESPONSE_BUFFER_SIZE 1024
+#define TINYDB_MAX_KV_RESPONSE_BUFFER_SIZE      (1024 * 1024 *2)  # 2MB
+#define TINYDB_MAX_ERROR_RESPONSE_BUFFER_SIZE   1024              # 1KB
 
 static char *
 tinydb_jsonfy_kv_response(const char *key, const char *val)
@@ -105,7 +105,7 @@ URI_get_cb(evhtp_request_t *req, void *userdata)
 	if (value != NULL) {
 		char *buf = (char *)malloc(sizeof(char) * (value_len + 1));
 		memset(buf, 0, value_len + 1);
-		snprintf(buf, value_len + 1, "%s", value);
+		snprintf(buf, value_len + 1, "%s", value);TINYDB_USE_ENGINE_LEVELDB
 		response = tinydb_jsonfy_kv_response(key, buf);
 		evbuffer_add_printf(req->buffer_out, "%s", response);
 		evhtp_send_reply(req, EVHTP_RES_OK);
@@ -124,7 +124,7 @@ URI_get_cb(evhtp_request_t *req, void *userdata)
 }
 
 static void
-URI_set_cb(evhtp_request_t *req, void *userdata)
+URI_set_cb(evhtp_request_t *req, void *userdata)TINYDB_USE_ENGINE_LEVELDB
 {
 	assert(userdata != NULL);
 	csas_context_t *context = (csas_context_t *)userdata;
@@ -221,31 +221,28 @@ main(int argc, char ** argv) {
 
 
 #if defined(TINYDB_USE_ENGINE_LEVELDB)
-	engine_base_t *engine_leveldb = (engine_base_t *)engine_leveldb_init();
-	csas_context_t *context = csas_init(engine_leveldb);
+	engine_base_t  * engine_leveldb = (engine_base_t *)engine_leveldb_init();
+	csas_context_t * context        = csas_init(engine_leveldb);
 #else
-	engine_base_t *engine_inmemory = (engine_base_t *)engine_inmemory_init();
-	csas_context_t *context = csas_init(engine_inmemory);
+	engine_base_t  * engine_inmemory = (engine_base_t *)engine_inmemory_init();
+	csas_context_t * context         = csas_init(engine_inmemory);
 #endif
 
 
-    evbase_t         * evbase = event_base_new();
-    evhtp_t          * htp    = evhtp_new(evbase, NULL);
-	
+    evbase_t         * evbase    = event_base_new();
+    evhtp_t          * htp       = evhtp_new(evbase, NULL);
+    evhtp_callback_t * get_cb    = NULL;
+    evhtp_callback_t * set_cb    = NULL;
+    evhtp_callback_t * delete_cb = NULL;
 
-    evhtp_callback_t * get_cb   = NULL;
-    evhtp_callback_t * set_cb   = NULL;
-    evhtp_callback_t * delete_cb   = NULL;
-
-    get_cb = evhtp_set_cb(htp, "/get", URI_get_cb, context);
-    set_cb = evhtp_set_cb(htp, "/set", URI_set_cb, context);
+    get_cb    = evhtp_set_cb(htp, "/get", URI_get_cb, context);
+    set_cb    = evhtp_set_cb(htp, "/set", URI_set_cb, context);
     delete_cb = evhtp_set_cb(htp, "/delete", URI_delete_cb, context);
 
 #ifdef EVHTP_ENABLE_EVTHR
     evhtp_use_threads(htp, NULL, 4, NULL);
 #endif
-    evhtp_bind_socket(htp, "0.0.0.0", 8088, 1024);
-
+    evhtp_bind_socket(htp, "0.0.0.0", 9090, 1024);
     event_base_loop(evbase, 0);
 
     evhtp_unbind_socket(htp);
@@ -257,4 +254,3 @@ main(int argc, char ** argv) {
 
     return 0;
 }
-

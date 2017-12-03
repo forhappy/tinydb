@@ -17,30 +17,30 @@
 #include <event2/buffer.h>
 #include <event2/bufferevent.h>
 
-#ifndef EVHTP_DISABLE_SSL
-#include <event2/bufferevent_ssl.h>
-#include <openssl/ssl.h>
-#include <openssl/err.h>
-#include <openssl/rand.h>
-#endif
+// #ifndef EVHTP_DISABLE_SSL
+// #include <event2/bufferevent_ssl.h>
+// #include <openssl/ssl.h>
+// #include <openssl/err.h>
+// #include <openssl/rand.h>
+// #endif
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-#ifndef EVHTP_DISABLE_SSL
-typedef SSL_SESSION               evhtp_ssl_sess_t;
-typedef SSL                       evhtp_ssl_t;
-typedef SSL_CTX                   evhtp_ssl_ctx_t;
-typedef X509                      evhtp_x509_t;
-typedef X509_STORE_CTX            evhtp_x509_store_ctx_t;
-#else
-typedef void                      evhtp_ssl_sess_t;
-typedef void                      evhtp_ssl_t;
-typedef void                      evhtp_ssl_ctx_t;
-typedef void                      evhtp_x509_t;
-typedef void                      evhtp_x509_store_ctx_t;
-#endif
+// #ifndef EVHTP_DISABLE_SSL
+// typedef SSL_SESSION               evhtp_ssl_sess_t;
+// typedef SSL                       evhtp_ssl_t;
+// typedef SSL_CTX                   evhtp_ssl_ctx_t;
+// typedef X509                      evhtp_x509_t;
+// typedef X509_STORE_CTX            evhtp_x509_store_ctx_t;
+// #else
+// typedef void                      evhtp_ssl_sess_t;
+// typedef void                      evhtp_ssl_t;
+// typedef void                      evhtp_ssl_ctx_t;
+// typedef void                      evhtp_x509_t;
+// typedef void                      evhtp_x509_store_ctx_t;
+// #endif
 
 typedef struct evbuffer           evbuf_t;
 typedef struct event              event_t;
@@ -153,12 +153,12 @@ typedef evhtp_res (*evhtp_hook_write_cb)(evhtp_connection_t * conn, void * arg);
 typedef int (*evhtp_kvs_iterator)(evhtp_kv_t * kv, void * arg);
 typedef int (*evhtp_headers_iterator)(evhtp_header_t * header, void * arg);
 
-typedef int (*evhtp_ssl_verify_cb)(int pre_verify, evhtp_x509_store_ctx_t * ctx);
-typedef int (*evhtp_ssl_chk_issued_cb)(evhtp_x509_store_ctx_t * ctx, evhtp_x509_t * x, evhtp_x509_t * issuer);
+// typedef int (*evhtp_ssl_verify_cb)(int pre_verify, evhtp_x509_store_ctx_t * ctx);
+// typedef int (*evhtp_ssl_chk_issued_cb)(evhtp_x509_store_ctx_t * ctx, evhtp_x509_t * x, evhtp_x509_t * issuer);
 
-typedef int (*evhtp_ssl_scache_add)(evhtp_connection_t * connection, unsigned char * sid, int sid_len, evhtp_ssl_sess_t * sess);
+// typedef int (*evhtp_ssl_scache_add)(evhtp_connection_t * connection, unsigned char * sid, int sid_len, evhtp_ssl_sess_t * sess);
 typedef void (*evhtp_ssl_scache_del)(evhtp_t * htp, unsigned char * sid, int sid_len);
-typedef evhtp_ssl_sess_t * (*evhtp_ssl_scache_get)(evhtp_connection_t * connection, unsigned char * sid, int sid_len);
+// typedef evhtp_ssl_sess_t * (*evhtp_ssl_scache_get)(evhtp_connection_t * connection, unsigned char * sid, int sid_len);
 typedef void * (*evhtp_ssl_scache_init)(evhtp_t *);
 
 #define EVHTP_VERSION           "1.1.7"
@@ -260,8 +260,8 @@ struct evhtp_s {
     uint64_t   max_keepalive_requests;
 
 #ifndef DISABLE_SSL
-    evhtp_ssl_ctx_t * ssl_ctx; /**< if ssl enabled, this is the servers CTX */
-    evhtp_ssl_cfg_t * ssl_cfg;
+    // evhtp_ssl_ctx_t * ssl_ctx; /**< if ssl enabled, this is the servers CTX */
+    // evhtp_ssl_cfg_t * ssl_cfg;
 #endif
 
 #ifndef EVHTP_DISABLE_EVTHR
@@ -411,7 +411,7 @@ struct evhtp_connection_s {
     evbase_t        * evbase;
     evbev_t         * bev;
     evthr_t         * thread;
-    evhtp_ssl_t     * ssl;
+    // evhtp_ssl_t     * ssl;
     evhtp_hooks_t   * hooks;
     htparser        * parser;
     event_t         * resume_ev;
@@ -469,15 +469,15 @@ struct evhtp_ssl_cfg_s {
     long                    ssl_ctx_timeout;
     int                     verify_peer;
     int                     verify_depth;
-    evhtp_ssl_verify_cb     x509_verify_cb;
-    evhtp_ssl_chk_issued_cb x509_chk_issued_cb;
+    // evhtp_ssl_verify_cb     x509_verify_cb;
+    // evhtp_ssl_chk_issued_cb x509_chk_issued_cb;
     long                    store_flags;
     evhtp_ssl_scache_type   scache_type;
     long                    scache_timeout;
     long                    scache_size;
     evhtp_ssl_scache_init   scache_init;
-    evhtp_ssl_scache_add    scache_add;
-    evhtp_ssl_scache_get    scache_get;
+    // evhtp_ssl_scache_add    scache_add;
+    // evhtp_ssl_scache_get    scache_get;
     evhtp_ssl_scache_del    scache_del;
     void                  * args;
 };

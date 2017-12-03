@@ -153,7 +153,7 @@ include_directories(
 set(LIBEVHTP_EXTERNAL_LIBS
 		${LIBEVENT_LIBRARY}
 		${LIBEVENT_PTHREADS_LIBRARY}
-		${LIBEVENT_OPENSSL_LIBRARY}
+		# ${LIBEVENT_OPENSSL_LIBRARY}
 		${OPENSSL_LIBRARIES})
 
 if (NOT ${LIBEVENT_PTHREADS_FOUND})
@@ -188,16 +188,16 @@ install (FILES htparse/htparse.h DESTINATION include)
 install (FILES evthr/evthr.h DESTINATION include)
 install (FILES oniguruma/onigposix.h DESTINATION include)
 
-find_library (LIB_DL dl)
-set (SYS_LIBS ${LIB_DL})
+# find_library (LIB_DL dl)
+# set (SYS_LIBS ${LIB_DL})
 
-if (NOT APPLE)
-	find_library (LIB_RT rt)
-	set (SYS_LIBS ${SYS_LIBS} ${LIB_RT})
-endif()
+# if (NOT APPLE)
+	# find_library (LIB_RT rt)
+	# set (SYS_LIBS ${SYS_LIBS} ${LIB_RT})
+# endif()
 
-add_executable(test test.c)
-target_link_libraries(test libevhtp ${LIBEVHTP_EXTERNAL_LIBS} ${SYS_LIBS})
+add_executable(test_tinydb test.c)
+target_link_libraries(test_tinydb libevhtp ${LIBEVHTP_EXTERNAL_LIBS} ${SYS_LIBS})
 
 add_executable(test_basic test_basic.c)
 target_link_libraries(test_basic libevhtp ${LIBEVHTP_EXTERNAL_LIBS} ${SYS_LIBS})
