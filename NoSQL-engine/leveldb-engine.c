@@ -15,8 +15,6 @@
 
 #include "leveldb-engine.h"
 
-static char *dbname = "/tmp/leveldb";
-
 static int
 put(engine_base_t *engine,
     const char *key,
@@ -25,7 +23,7 @@ put(engine_base_t *engine,
 	size_t value_len)
 {
 	engine_leveldb_t *engine_leveldb = (engine_leveldb_t *)engine;
-	leveldb_instance_t *instance = engine_leveldb->instance;
+	engine_leveldb_instance_t *instance = engine_leveldb->instance;
 
 	leveldb_put(instance->db, instance->woptions, key, key_len, value, value_len, &(instance->err));
 
@@ -40,7 +38,7 @@ get(engine_base_t *engine,
 {
 	char* value;
 	engine_leveldb_t *engine_leveldb = (engine_leveldb_t *)engine;
-	leveldb_instance_t *instance = engine_leveldb->instance;
+	engine_leveldb_instance_t *instance = engine_leveldb->instance;
 
 	value = leveldb_get(instance->db, instance->roptions, key, key_len, value_len, &(instance->err));
 
@@ -53,14 +51,14 @@ delete(engine_base_t *engine,
 	   size_t key_len)
 {
 	engine_leveldb_t *engine_leveldb = (engine_leveldb_t *)engine;
-	leveldb_instance_t *instance = engine_leveldb->instance;
+	engine_leveldb_instance_t *instance = engine_leveldb->instance;
 
     leveldb_delete(instance->db, instance->woptions, key, key_len, &(instance->err));
 	
 	return 0;
 }
 
-static  engine_leveldb_config_t *
+static engine_leveldb_config_t *
 engine_leveldb_config_init(void)
 {
 	engine_leveldb_config_t *config = (engine_leveldb_config_t *)malloc(sizeof(engine_leveldb_config_t));
@@ -86,10 +84,10 @@ engine_leveldb_config_init(void)
 	return config;
 }
 
-static leveldb_instance_t *
-leveldb_instance_init(engine_leveldb_config_t *config)
+static engine_leveldb_instance_t *
+engine_leveldb_instance_init(engine_leveldb_config_t *config)
 {
-	leveldb_instance_t *instance = (leveldb_instance_t *)malloc(sizeof(leveldb_instance_t));
+	engine_leveldb_instance_t *instance = (engine_leveldb_instance_t *)malloc(sizeof(engine_leveldb_instance_t));
 	
 	instance->comparator   = NULL;
 	instance->env          = leveldb_create_default_env();
@@ -130,8 +128,8 @@ engine_leveldb_init()
 {
 	engine_leveldb_t *engine = (engine_leveldb_t *)malloc(sizeof(engine_leveldb_t));
 
-	engine_leveldb_config_t *config   = engine_leveldb_config_init();
-	leveldb_instance_t      *instance = leveldb_instance_init(config);
+	engine_leveldb_config_t   *config   = engine_leveldb_config_init();
+	engine_leveldb_instance_t *instance = engine_leveldb_instance_init(config);
 
 	engine->config = config;
 	engine->instance = instance;

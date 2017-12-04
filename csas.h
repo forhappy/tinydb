@@ -24,11 +24,11 @@ typedef struct engine_operation_s_ engine_operation_t;
 typedef struct csas_context_s_ csas_context_t;
 
 /*
- * CSAS
+ * 通用存储服务
  */
 struct csas_context_s_ {
-	csas_context_t *next;
 	engine_base_t  *engine;
+	csas_context_t *next;
 	/* more stuff here... */
 };
 
@@ -36,14 +36,14 @@ struct csas_context_s_ {
  * 存储引擎
  */
 struct engine_base_s_ {
-	char               *name;
-	size_t             version;
-	engine_operation_t *engine_ops;
+	char               *name;        // 数据库名称      
+	size_t             version;      // 数据库版本
+	engine_operation_t *engine_ops;  // 数据库操作集合
 	/* more stuff about storage engine base here... */
 };
 
 /*
- * 存储引擎操作
+ * 数据库操作集合
  */
 struct engine_operation_s_ {
 	int (*put)(engine_base_t *engine,
@@ -60,8 +60,6 @@ struct engine_operation_s_ {
 	int (*delete)(engine_base_t *engine,
 			      const char *key,
 				  size_t key_len);
-
-	int (*unsupported_operation)(engine_base_t *engine);
 };
 
 /*
@@ -70,24 +68,28 @@ struct engine_operation_s_ {
 csas_context_t * csas_init(engine_base_t *engine);
 
 /*
- * CSAS PUT服务
+ * CSAS - PUT服务
  */
 int csas_put(csas_context_t *context,
-		const char *key, size_t key_len,
-		const char *value, size_t value_len);
+		     const char *key,
+			 size_t key_len,
+		     const char *value,
+			 size_t value_len);
 
 /*
- * CSAS GET服务
+ * CSAS - GET服务
  */
 char * csas_get(csas_context_t *context,
-		const char *key, size_t key_len,
-		size_t *value_len);
+		        const char *key,
+				size_t key_len,
+		        size_t *value_len);
 
 /*
- * CSAS DELETE服务
+ * CSAS - DELETE服务
  */
 int csas_delete(csas_context_t *context,
-		const char *key, size_t key_len);
+		        const char *key,
+				size_t key_len);
 
 /*
  * 清除CSAS服务

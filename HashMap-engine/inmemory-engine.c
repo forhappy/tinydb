@@ -22,14 +22,15 @@ put(engine_base_t *engine,
 	const char *value,
 	size_t value_len)
 {
-	inmemory_instance_t *tmp = NULL;
+	engine_inmemory_instance_t *tmp = NULL;
 	engine_inmemory_t *engine_inmemory = (engine_inmemory_t *)engine;
 
 	HASH_FIND_STR(engine_inmemory->instance, key, tmp);
 	if (tmp == NULL) {
-		tmp = (inmemory_instance_t *)malloc(sizeof(inmemory_instance_t));
+		tmp = (engine_inmemory_instance_t *)malloc(sizeof(engine_inmemory_instance_t));
 		if (tmp == NULL) {
 			fprintf(stderr, "put key-value pair failed due to out of memory.\n");
+
 			return -1;
 		}
 
@@ -42,6 +43,8 @@ put(engine_base_t *engine,
 		strncpy(tmp->value, value, value_len);
 
 		HASH_ADD_KEYPTR(hh, engine_inmemory->instance, tmp->key, strlen(tmp->key), tmp);
+	} else {
+		return -1;
 	}
 
 	return 0;
@@ -54,12 +57,13 @@ get(engine_base_t *engine,
 	size_t *value_len)
 {
 	char *value;
-	inmemory_instance_t *tmp = NULL;
+	engine_inmemory_instance_t *tmp = NULL;
 	engine_inmemory_t *engine_inmemory = (engine_inmemory_t *)engine;
 
 	HASH_FIND_STR(engine_inmemory->instance, key, tmp);
 	if (tmp == NULL) {
 		*value_len = 0;
+
 		return NULL;
 	} else {
 		int tmpval_len = strlen(tmp->value);
@@ -77,11 +81,12 @@ delete(engine_base_t *engine,
 	   const char *key,
 	   size_t key_len)
 {
-	inmemory_instance_t *tmp = NULL;
+	engine_inmemory_instance_t *tmp = NULL;
 	engine_inmemory_t *engine_inmemory = (engine_inmemory_t *)engine;
 
 	HASH_FIND_STR(engine_inmemory->instance, key, tmp);
 	if (tmp == NULL) {
+		
 		return 0;
 	} else {
 		HASH_DEL(engine_inmemory->instance, tmp);
@@ -97,7 +102,8 @@ engine_inmemory_init(void)
 {
 	engine_inmemory_t *engine = (engine_inmemory_t *)malloc(sizeof(engine_inmemory_t));
 
-	engine->instance = NULL;  // TODO
+	engine->config = (engine_inmemory_config_t *) malloc(sizeof(engine_inmemory_config_t));
+	engine->instance = NULL;
 
 	engine_operation_t *engine_ops = (engine_operation_t *)malloc(sizeof(engine_operation_t));
 

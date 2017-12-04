@@ -60,7 +60,7 @@ csas_delete(csas_context_t *context,
 {
 	int ret = -1;
 
-	ret = context->engine->engine_ops->delete(context->engine,key, key_len);
+	ret = context->engine->engine_ops->delete(context->engine, key, key_len);
 
 	return ret;
 }

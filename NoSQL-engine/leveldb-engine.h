@@ -24,9 +24,11 @@
 
 #include "../csas.h"
 
-typedef struct engine_leveldb_s_ engine_leveldb_t;
 typedef struct engine_leveldb_config_s_ engine_leveldb_config_t;
-typedef struct leveldb_instance_s_ leveldb_instance_t;
+typedef struct engine_leveldb_instance_s_ engine_leveldb_instance_t;
+typedef struct engine_leveldb_s_ engine_leveldb_t;
+
+static char *dbname = "/tmp/leveldb";
 
 /* 
  * leveldb config
@@ -34,7 +36,7 @@ typedef struct leveldb_instance_s_ leveldb_instance_t;
 struct engine_leveldb_config_s_ {
 	char     *dbname;                 /** default database name */
 	bool     create_if_missing;       /** create database if it doesn't exist */
-	bool     error_if_exist;          /** open database throws an error if exist */
+	bool     error_if_exist;          /** open database throws an error if it do exist */
 	size_t   lru_cache_size;          /** leveldb's lru cache size */
 	size_t   write_buffer_size;       /** leveldb's write buffer size */
 	bool     paranoid_checks;         /** paranoid checks */
@@ -50,7 +52,7 @@ struct engine_leveldb_config_s_ {
 /* 
  * leveldb instance
  */
-struct leveldb_instance_s_ {
+struct engine_leveldb_instance_s_ {
 	leveldb_t              *db;
 	leveldb_comparator_t   *comparator;
 	leveldb_env_t          *env;
@@ -73,9 +75,9 @@ struct engine_leveldb_s_ {
 	/*
 	 * engine base goes here, it MUST be a struct object, and NOT a struct pointer. 
 	 */
-	engine_base_t           base;
-	leveldb_instance_t      *instance;
-	engine_leveldb_config_t *config;
+	engine_base_t             base;
+	engine_leveldb_config_t   *config;
+	engine_leveldb_instance_t *instance;
 };
 
 extern engine_leveldb_t * engine_leveldb_init();
