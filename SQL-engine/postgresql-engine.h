@@ -1,9 +1,9 @@
 /*
  * =============================================================================
  *
- *       Filename:  example-engine.h
+ *       Filename:  postgresql-engine.h
  *
- *    Description:  example storage engine
+ *    Description:  postgresql storage engine
  *
  *        Created:  11/24/2012 03:49:23 PM
  *
@@ -13,10 +13,15 @@
  * =============================================================================
  */
 
-#ifndef EXAMPLE_ENGINE_H
-#define EXAMPLE_ENGINE_H
-#include "csas.h"
+#ifndef __POSTGRESQL_ENGINE_H__
+#define __POSTGRESQL_ENGINE_H__
 
-extern engine_base_t * engine_example_init();
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
 
-#endif /* EXAMPLE_ENGINE_H */
+#include "../csas.h"
+
+extern engine_base_t * engine_postgresql_init();
+
+#endif /* __POSTGRESQL_ENGINE_H__ */

@@ -13,51 +13,57 @@
  * =============================================================================
  */
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-
 #include "inmemory-engine.h"
 
 static int
 put(engine_base_t *engine,
-		const char *key, unsigned int key_len,
-		const char *value, unsigned int value_len)
+	const char *key,
+	size_t key_len,
+	const char *value,
+	size_t value_len)
 {
-	inmemory_instance_t *tmp = NULL;
+	engine_inmemory_instance_t *tmp = NULL;
 	engine_inmemory_t *engine_inmemory = (engine_inmemory_t *)engine;
 
 	HASH_FIND_STR(engine_inmemory->instance, key, tmp);
 	if (tmp == NULL) {
-		tmp = (inmemory_instance_t *)malloc(sizeof(inmemory_instance_t));
+		tmp = (engine_inmemory_instance_t *)malloc(sizeof(engine_inmemory_instance_t));
 		if (tmp == NULL) {
 			fprintf(stderr, "put key-value pair failed due to out of memory.\n");
+
 			return -1;
 		}
+
 		tmp->key = (char *)malloc(sizeof(char) * (key_len + 1));
 		memset(tmp->key, 0, (key_len + 1));
 		strncpy(tmp->key, key, key_len);
+
 		tmp->value = (char *)malloc(sizeof(char) * (value_len + 1));
 		memset(tmp->value, 0, (value_len + 1));
 		strncpy(tmp->value, value, value_len);
+
 		HASH_ADD_KEYPTR(hh, engine_inmemory->instance, tmp->key, strlen(tmp->key), tmp);
+	} else {
+		return -1;
 	}
+
 	return 0;
 }
 
 static char *
 get(engine_base_t *engine,
-		const char *key, unsigned int key_len,
-		unsigned int *value_len)
+	const char *key,
+	size_t key_len,
+	size_t *value_len)
 {
-	char* value;
-	inmemory_instance_t *tmp = NULL;
+	char *value;
+	engine_inmemory_instance_t *tmp = NULL;
 	engine_inmemory_t *engine_inmemory = (engine_inmemory_t *)engine;
 
 	HASH_FIND_STR(engine_inmemory->instance, key, tmp);
 	if (tmp == NULL) {
 		*value_len = 0;
-		return NULL;
+		value = NULL;
 	} else {
 		int tmpval_len = strlen(tmp->value);
 		value = (char *)malloc(sizeof(char) * (tmpval_len + 1));
@@ -70,44 +76,57 @@ get(engine_base_t *engine,
 }
 
 static int
-delete(engine_base_t *engine,
-		const char *key, unsigned int key_len)
+del(engine_base_t *engine,
+	const char *key,
+	size_t key_len)
 {
-	inmemory_instance_t *tmp = NULL;
+	engine_inmemory_instance_t *tmp = NULL;
 	engine_inmemory_t *engine_inmemory = (engine_inmemory_t *)engine;
 
 	HASH_FIND_STR(engine_inmemory->instance, key, tmp);
 	if (tmp == NULL) {
+		
 		return 0;
 	} else {
 		HASH_DEL(engine_inmemory->instance, tmp);
 		if (tmp->key != NULL) free(tmp->key);
 		if (tmp->value != NULL) free(tmp->value);
 	}
+
 	return 0;
 }
 
-engine_inmemory_t * engine_inmemory_init(void)
+static void
+quit(engine_base_t *engine)
 {
-	engine_inmemory_t *engine = (engine_inmemory_t *)
-		malloc(sizeof(engine_inmemory_t));
+	engine_inmemory_t *engine_inmemory = (engine_inmemory_t *)engine;
+	
+	free(engine_inmemory->config);
+}
 
+engine_inmemory_t *
+engine_inmemory_init(void)
+{
+	engine_inmemory_t *engine = (engine_inmemory_t *)malloc(sizeof(engine_inmemory_t));
+
+	engine->config = (engine_inmemory_config_t *) malloc(sizeof(engine_inmemory_config_t));
 	engine->instance = NULL;
 
-	engine_operation_t *engine_ops = (engine_operation_t *)
-		malloc(sizeof(engine_operation_t));
+	engine_operation_t *engine_ops = (engine_operation_t *)malloc(sizeof(engine_operation_t));
 
 	const char *engine_name = "inmemory engine v0.1";
-	unsigned int engine_name_len = strlen(engine_name);
-	unsigned int version = 0x1;
+	size_t engine_name_len = strlen(engine_name);
 	engine->base.name = malloc(sizeof(char) * (engine_name_len + 1));
 	memset(engine->base.name, 0, (engine_name_len + 1));
 	strncpy(engine->base.name, engine_name, engine_name_len);
+
+	size_t version = 0x1;
 	engine->base.version = version;
 
-	engine_ops->put = put;
-	engine_ops->get = get;
-	engine_ops->delete = delete;
+	engine_ops->put  = put;
+	engine_ops->get  = get;
+	engine_ops->del  = del;
+	engine_ops->quit = quit;
 
 	engine->base.engine_ops = engine_ops;
 

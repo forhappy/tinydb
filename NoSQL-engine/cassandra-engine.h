@@ -1,9 +1,9 @@
 /*
  * =============================================================================
  *
- *       Filename:  sqlite-engine.h
+ *       Filename:  cassandra-engine.h
  *
- *    Description:  sqlite storage engine
+ *    Description:  cassandra storage engine
  *
  *        Created:  11/24/2012 03:49:23 PM
  *
@@ -13,10 +13,15 @@
  * =============================================================================
  */
 
-#ifndef SQLITE_ENGINE_H
-#define SQLITE_ENGINE_H
-#include "csas.h"
+#ifndef __CASSANDRA_ENGINE_H__
+#define __CASSANDRA_ENGINE_H__
 
-extern engine_base_t * engine_sqlite_init();
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
 
-#endif /* SQLITE_ENGINE_H */
+#include "../csas.h"
+
+extern engine_base_t * engine_cassandra_init();
+
+#endif /* __CASSANDRA_ENGINE_H__ */

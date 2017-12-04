@@ -1,52 +1,44 @@
-all:server t 
+all:server
 
 CC=gcc
-CFLAGS=-g -std=c99 -Wall -Wno-unused -I/usr/local/include/leveldb/ -I./include/ 
-LDFALGS=-lpthread\
-		-L/usr/local/lib/ -lleveldb -levent\
-		-L./lib/ -levhtp
+CFLAGS=-g -Wall -std=c99 -Wno-unused -I./include/ 
+LDFALGS=-L/usr/local/lib/ -lleveldb -lhiredis -lmemcached -levent\
+		-L./lib/ -levhtp\
+        -lpthread\
 
-server:server.o csas.o\
+server:server.o\
+    csas.o\
 	inmemory-engine.o\
 	leveldb-engine.o\
-	sqlite-engine.o\
-	example-engine.o
-	$(CC) -o $@ $^ $(LDFALGS)
-
-t:t.o csas.o\
-	inmemory-engine.o\
-	leveldb-engine.o\
-	sqlite-engine.o\
-	example-engine.o
+	redis-engine.o\
+	memcached-engine.o
 	$(CC) -o $@ $^ $(LDFALGS)
 
 server.o:server.c
 	$(CC) -o $@ -c $^ $(CFLAGS)
 
-t.o:t.c
-	$(CC) -o $@ -c $^ $(CFLAGS)
-
 csas.o:csas.c
 	$(CC) -o $@ -c $^ $(CFLAGS)
 
-inmemory-engine.o:inmemory-engine.c
+inmemory-engine.o:HashMap-engine/inmemory-engine.c
 	$(CC) $(CFLAGS) -o $@ -c $^
 
-leveldb-engine.o:leveldb-engine.c
+leveldb-engine.o:NoSQL-engine/leveldb-engine.c
 	$(CC) $(CFLAGS) -o $@ -c $^
 
-sqlite-engine.o:sqlite-engine.c
+redis-engine.o:NoSQL-engine/redis-engine.c
 	$(CC) $(CFLAGS) -o $@ -c $^
 
-example-engine.o:example-engine.c
-	$(CC) -o $@ -c $^
+memcached-engine.o:NoSQL-engine/memcached-engine.c
+	$(CC) $(CFLAGS) -o $@ -c $^
 
 
 .PHONY:clean
 
 clean:
-	rm server t server.o t.o csas.o\
+	rm server server.o\
+        csas.o\
 		inmemory-engine.o\
 		leveldb-engine.o\
-		sqlite-engine.o\
-		example-engine.o
+		redis-engine.o\
+		memcached-engine.o

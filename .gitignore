@@ -15,3 +15,7 @@
 *.exe
 *.out
 *.app
+
+libevhtp/build/*
+
+server
