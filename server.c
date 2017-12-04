@@ -19,7 +19,8 @@
 #include <string.h>
 #include <assert.h>
 #include <errno.h>
-#include <evhtp/evhtp.h>
+
+#include "evhtp/evhtp.h"
 
 #define TINYDB_USE_ENGINE_LEVELDB
 
