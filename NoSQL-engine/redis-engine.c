@@ -24,8 +24,9 @@ put(engine_base_t *engine,
 {
 	engine_redis_t *engine_redis = (engine_redis_t *)engine;
 	redisContext *context = engine_redis->instance->context;
+	redisReply *reply;
 
-	redisReply *reply = redisCommand(context, "SET %b %b", key, key_len, value, value_len);
+	reply = redisCommand(context, "SET %b %b", key, key_len, value, value_len);
 	if (reply->type == REDIS_REPLY_ERROR) {
 		freeReplyObject(reply);
 
@@ -46,13 +47,13 @@ get(engine_base_t *engine,
 	char* value;
 	engine_redis_t *engine_redis = (engine_redis_t *)engine;
 	redisContext *context = engine_redis->instance->context;
+	redisReply *reply;
 
-	redisReply *reply = redisCommand(context, "GET %s", key);
+	reply = redisCommand(context, "GET %s", key);
 	if (reply->type == REDIS_REPLY_ERROR) {
 		*value_len = 0;
 		freeReplyObject(reply);
-
-		return NULL;
+		value = NULL;
 	} else if (reply->type == REDIS_REPLY_STRING) {
 		int tmpval_len = reply->len;
 		value = (char *)malloc(sizeof(char) * (tmpval_len + 1));
@@ -70,14 +71,15 @@ get(engine_base_t *engine,
 }
 
 static int
-delete(engine_base_t *engine,
-	   const char *key,
-	   size_t key_len)
+del(engine_base_t *engine,
+	const char *key,
+	size_t key_len)
 {
 	engine_redis_t *engine_redis = (engine_redis_t *)engine;
 	redisContext *context = engine_redis->instance->context;
+	redisReply *reply;
 
-	redisReply *reply = redisCommand(context, "DEL %s", key);
+	reply = redisCommand(context, "DEL %s", key);
 	if (reply->type == REDIS_REPLY_ERROR) {
 		freeReplyObject(reply);
 
@@ -89,18 +91,32 @@ delete(engine_base_t *engine,
 	return 0;
 }
 
+static void
+quit(engine_base_t *engine)
+{
+	engine_redis_t *engine_redis = (engine_redis_t *)engine;
+	redisContext *context = engine_redis->instance->context;
+
+	redisFree(context);
+	
+	free(engine_redis->config);
+	free(engine_redis->instance);
+} 
+
 static engine_redis_config_t *
-engine_redis_config_init() {
+engine_redis_config_init()
+{
 	engine_redis_config_t *config = (engine_redis_config_t *)malloc(sizeof(engine_redis_config_t));
 
-	config->ip = "127.0.0.1";
+	config->ip   = "127.0.0.1";
 	config->port = 6379;
 
 	return config;
 }
 
 static engine_redis_instance_t *
-engine_redis_instance_init(engine_redis_config_t *config) {
+engine_redis_instance_init(engine_redis_config_t *config)
+{
 	engine_redis_instance_t *instance = (engine_redis_instance_t *)malloc(sizeof(engine_redis_instance_t));
 
 	redisContext *c = redisConnect(config->ip, config->port);
@@ -125,9 +141,6 @@ engine_redis_init()
 
 	engine_redis_config_t   *config   = engine_redis_config_init();
 	engine_redis_instance_t *instance = engine_redis_instance_init(config);
-	if (config == NULL) {
-		return NULL;
-	}
 
 	engine->config = config;
 	engine->instance = instance;
@@ -143,9 +156,10 @@ engine_redis_init()
 	size_t version = 0x1;
 	engine->base.version = version;
 
-	engine_ops->put    = put;
-	engine_ops->get    = get;
-	engine_ops->delete = delete;
+	engine_ops->put  = put;
+	engine_ops->get  = get;
+	engine_ops->del  = del;
+	engine_ops->quit = quit;
 
 	engine->base.engine_ops = engine_ops;
 

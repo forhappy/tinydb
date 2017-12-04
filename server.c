@@ -24,7 +24,8 @@
 
 // #define TINYDB_USE_ENGINE_LEVELDB
 // #define TINYDB_USE_ENGINE_INMEMORY
-#define TINYDB_USE_ENGINE_REDIS
+// #define TINYDB_USE_ENGINE_REDIS
+#define TINYDB_USE_ENGINE_MEMCACHED
 
 #if defined(TINYDB_USE_ENGINE_LEVELDB)
 #include "NoSQL-engine/leveldb-engine.h"
@@ -32,6 +33,8 @@
 #include "HashMap-engine/inmemory-engine.h"
 #elif defined(TINYDB_USE_ENGINE_REDIS)
 #include "NoSQL-engine/redis-engine.h"
+#elif defined(TINYDB_USE_ENGINE_MEMCACHED)
+#include "NoSQL-engine/memcached-engine.h"
 #endif
 
 
@@ -262,7 +265,10 @@ main(int argc, char ** argv) {
 	csas_context_t *context         = csas_init(engine_inmemory);
 #elif defined(TINYDB_USE_ENGINE_REDIS)
 	engine_base_t  *engine_redis = (engine_base_t *)engine_redis_init();
-	csas_context_t *context        = csas_init(engine_redis);
+	csas_context_t *context      = csas_init(engine_redis);
+#elif defined(TINYDB_USE_ENGINE_MEMCACHED)
+	engine_base_t  *engine_memcached = (engine_base_t *)engine_memcached_init();
+	csas_context_t *context          = csas_init(engine_memcached);
 #endif
 
     evbase_t         * evbase    = event_base_new();

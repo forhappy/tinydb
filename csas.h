@@ -57,9 +57,11 @@ struct engine_operation_s_ {
 				  size_t key_len,
 			      size_t *value_len);
 
-	int (*delete)(engine_base_t *engine,
-			      const char *key,
-				  size_t key_len);
+	int (*del)(engine_base_t *engine,
+			   const char *key,
+			   size_t key_len);
+	
+	void (*quit)(engine_base_t *engine);
 };
 
 /*

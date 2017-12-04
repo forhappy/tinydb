@@ -63,8 +63,7 @@ get(engine_base_t *engine,
 	HASH_FIND_STR(engine_inmemory->instance, key, tmp);
 	if (tmp == NULL) {
 		*value_len = 0;
-
-		return NULL;
+		value = NULL;
 	} else {
 		int tmpval_len = strlen(tmp->value);
 		value = (char *)malloc(sizeof(char) * (tmpval_len + 1));
@@ -77,9 +76,9 @@ get(engine_base_t *engine,
 }
 
 static int
-delete(engine_base_t *engine,
-	   const char *key,
-	   size_t key_len)
+del(engine_base_t *engine,
+	const char *key,
+	size_t key_len)
 {
 	engine_inmemory_instance_t *tmp = NULL;
 	engine_inmemory_t *engine_inmemory = (engine_inmemory_t *)engine;
@@ -95,6 +94,14 @@ delete(engine_base_t *engine,
 	}
 
 	return 0;
+}
+
+static void
+quit(engine_base_t *engine)
+{
+	engine_inmemory_t *engine_inmemory = (engine_inmemory_t *)engine;
+	
+	free(engine_inmemory->config);
 }
 
 engine_inmemory_t *
@@ -116,9 +123,10 @@ engine_inmemory_init(void)
 	size_t version = 0x1;
 	engine->base.version = version;
 
-	engine_ops->put    = put;
-	engine_ops->get    = get;
-	engine_ops->delete = delete;
+	engine_ops->put  = put;
+	engine_ops->get  = get;
+	engine_ops->del  = del;
+	engine_ops->quit = quit;
 
 	engine->base.engine_ops = engine_ops;
 

@@ -46,9 +46,9 @@ get(engine_base_t *engine,
 }
 
 static int
-delete(engine_base_t *engine,
-	   const char *key,
-	   size_t key_len)
+del(engine_base_t *engine,
+	const char *key,
+	size_t key_len)
 {
 	engine_leveldb_t *engine_leveldb = (engine_leveldb_t *)engine;
 	engine_leveldb_instance_t *instance = engine_leveldb->instance;
@@ -57,6 +57,15 @@ delete(engine_base_t *engine,
 	
 	return 0;
 }
+
+static void
+quit(engine_base_t *engine)
+{
+	engine_leveldb_t *engine_leveldb = (engine_leveldb_t *)engine;
+	
+	free(engine_leveldb->config);
+	free(engine_leveldb->instance);
+} 
 
 static engine_leveldb_config_t *
 engine_leveldb_config_init(void)
@@ -145,9 +154,10 @@ engine_leveldb_init()
 	size_t version = 0x1;
 	engine->base.version = version;
 
-	engine_ops->put    = put;
-	engine_ops->get    = get;
-	engine_ops->delete = delete;
+	engine_ops->put  = put;
+	engine_ops->get  = get;
+	engine_ops->del  = del;
+	engine_ops->quit = quit;
 
 	engine->base.engine_ops = engine_ops;
 
